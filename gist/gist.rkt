@@ -10,7 +10,9 @@
  (contract-out
   [get-gist-object (-> gist-id/c jsexpr?)]
   [get-gist-files (-> jsexpr? (listof string?))]
-  [get-gist-files/dict (-> jsexpr? (hash/c string? string?))]))
+  [get-gist-files/dict (-> jsexpr? (hash/c string? string?))]
+  [gist-spec? (-> any/c boolean?)]
+  [gist-spec->id (-> gist-spec? gist-id/c)]))
 
 (define pre values)
 (wffi-define-all "gist.md" pre check-response/json)
