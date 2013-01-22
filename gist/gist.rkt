@@ -1,10 +1,16 @@
-#lang racket
+#lang racket/base
 
 (require json
          net/url
+         racket/contract
          racket/dict
+         racket/list
+         racket/port
          rackunit
-         wffi/client)
+         wffi/client
+         (for-syntax racket/base
+                     racket/runtime-path
+                     wffi/markdown))
 
 (provide
  (contract-out
