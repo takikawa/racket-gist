@@ -17,16 +17,17 @@
 
     (inherit get-definitions-text)
 
-    (define/override (edit-menu:between-find-and-preferences edit-menu)
-      (super edit-menu:between-find-and-preferences edit-menu)
+    (define/override (file-menu:between-open-and-revert file-menu)
+      (super file-menu:between-open-and-revert file-menu)
       (new menu-item%
            [label "Download gist..."]
-           [parent edit-menu]
+           [parent file-menu]
            [callback (λ (i e) (do-gist this))])
       (new menu-item%
            [label "Show public gists..."]
-           [parent edit-menu]
-           [callback (λ (i e) (show-gists this))]))
+           [parent file-menu]
+           [callback (λ (i e) (show-gists this))])
+      (new separator-menu-item% [parent file-menu]))
 
     (super-new)))
 
