@@ -18,7 +18,7 @@
     (define/override (edit-menu:between-find-and-preferences edit-menu)
       (super edit-menu:between-find-and-preferences edit-menu)
       (new menu-item%
-           [label "Download gist"]
+           [label "Download gist..."]
            [parent edit-menu]
            [callback (λ (i e) (do-gist this))]))
 
