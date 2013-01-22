@@ -21,6 +21,19 @@
   [gist-spec->id (-> gist-spec? gist-id/c)]))
 
 (define pre values)
+
+;; define the runtime path for use at phase 1
+(module path racket/base
+  (require racket/runtime-path)
+
+  (define-runtime-path here ".")
+  (provide here))
+
+;; make sure gist.md can be found
+(require (for-syntax 'path))
+
+(begin-for-syntax
+  (current-markdown-files-path here))
 (wffi-define-all "gist.md" pre check-response/json)
 
 ;; returns the JSON object for a gist
