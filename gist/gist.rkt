@@ -8,6 +8,7 @@
          racket/port
          rackunit
          wffi/client
+         wffi/markdown
          (for-syntax racket/base
                      racket/runtime-path
                      wffi/markdown))
@@ -30,10 +31,12 @@
   (provide here))
 
 ;; make sure gist.md can be found
-(require (for-syntax 'path))
+(require 'path (for-syntax 'path))
 
 (begin-for-syntax
   (current-markdown-files-path here))
+(current-markdown-files-path here)
+
 (wffi-define-all "gist.md" pre check-response/json)
 
 ;; returns the JSON object for a gist
