@@ -4,6 +4,7 @@
          data/gvector
          framework
          gist
+         net/sendurl
          racket/class
          racket/gui
          racket/list)
@@ -86,11 +87,45 @@
                        [style '(no-border no-hscroll
                                 no-vscroll transparent)]
                        [editor gist-text]))
+
    (define description
      (let ([elem (dict-ref gist-json 'description)])
        (if (or (eq? 'null elem) (string=? "" elem))
            "No description provided"
            elem)))
+
+   (define username
+     (let ([user (dict-ref gist-json 'user)])
+       (if (eq? user 'null)
+           "anonymous"
+           (dict-ref user 'login))))
+
+   (define-values (l1 l2 l3 l4) ; save positions for later
+     (values #f #f #f #f))
+
+   (set-locs l1 l2 gist-text (send gist-text insert "url: "))
+
+   (set-locs l3 l4 gist-text
+    (do-url-clickback gist-text
+     (send gist-text insert
+           (dict-ref gist-json 'html_url))))
+
+   (send gist-text insert "\n")
+
+   (send gist-text change-style
+         (make-object style-delta% 'change-bold)
+         l1 l2)
+   (send gist-text change-style
+         (make-object style-delta% 'change-underline)
+         l3 l4)
+
+   (set-locs l1 l2 gist-text (send gist-text insert "user: "))
+   (send gist-text insert username)
+   (send gist-text change-style
+         (make-object style-delta% 'change-bold)
+         l1 l2)
+
+   (send gist-text insert "\n")
    (send gist-text insert description)
    (send gist-text hide-caret #t)
    (send gist-text lock #t)
@@ -99,6 +134,25 @@
    (define line-padding 2)
    (send canvas set-line-count
          (+ line-padding (send gist-text last-line)))))
+
+;; Helpers
+(define (url-callback text start end)
+  (send-url (send text get-text start end)))
+
+(define-syntax-rule (do-url-clickback text e ...)
+  (do-clickback text url-callback e ...))
+
+(define-syntax-rule (do-clickback text callback e ...)
+  (let ([position (send text last-position)])
+    e ...
+    (send text set-clickback
+          position (send text last-position) callback)))
+
+(define-syntax-rule (set-locs x y text e ...)
+  (begin
+    (set! x (send text last-position))
+    e ...
+    (set! y (send text last-position))))
 
 ;; Tool setup
 (define (phase1) (void))
