@@ -18,6 +18,7 @@
   [get-gist-object (-> gist-id/c jsexpr?)]
   [get-gist-files (-> jsexpr? (listof string?))]
   [get-gist-files/dict (-> jsexpr? (hash/c string? string?))]
+  [get-public-gists (-> (listof jsexpr?))]
   [gist-spec? (-> any/c boolean?)]
   [gist-spec->id (-> gist-spec? gist-id/c)]))
 
@@ -69,6 +70,12 @@
          (retrieve-contents file)))
       (for/list ([file (in-hash-values files)])
         (retrieve-contents file))))
+
+;; retrieve a list of public gist objects
+(define (get-public-gists)
+  (list-public-gists))
+
+;; Utilities and contracts
 
 (define gist-id/c
   (flat-named-contract 'gist-id exact-nonnegative-integer?))
