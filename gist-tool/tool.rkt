@@ -56,9 +56,15 @@
 
 ;; dialog% for displaying gists
 (define gist-dialog%
-  (class dialog%
+  (class frame%
     (init-field frame)
-    (super-new [label "Public gists"])
+
+    (define-values (display-w display-h)
+      (get-display-size))
+
+    (super-new [label "Public gists"]
+               [width (/ display-w 2)]
+               [height (/ display-h 2)])
 
     ;; to contain the editors for each gist
     (define panel (new vertical-panel%
