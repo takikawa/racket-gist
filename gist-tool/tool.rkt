@@ -55,15 +55,6 @@
 
     ;; to contain the editors for each gist
     (define panel (new vertical-panel% [parent this]))
-    (define main-editor (new text:basic% [auto-wrap #t]))
-    (define main-ec (new editor-canvas%
-                         [parent panel]
-                         [editor main-editor]
-                         [style '(no-hscroll)]
-                         [stretchable-width #t]))
-
-    ;; snips for each gist
-    (define snips (gvector))
 
     ;; display a list of gists
     (define/public (add-gists lst-of-gists)
@@ -72,25 +63,31 @@
 
     ;; add a gist to the dialog
     (define (add-gist gist-json)
-      (define gist-text (new text:basic% [auto-wrap #t]))
-      (define snip (new editor-snip% [editor gist-text]))
-      (gvector-add! snips snip)
-      (send main-editor insert snip)
-      (send main-editor insert "\n")
-      (define description
-        (let ([elem (dict-ref gist-json 'description)])
-          (if (or (eq? 'null elem) (string=? "" elem))
-              "No description provided"
-              elem)))
-      (send gist-text insert (dict-ref gist-json 'id))
-      (send gist-text insert "\n")
-      (send gist-text insert description)
-      (send gist-text lock #t))
+      (new gist%
+           [gist-json gist-json]
+           [parent panel]))))
 
-    (define/override (on-size width height)
-      (for ([snip (in-gvector snips)])
-        (send snip set-max-width width)
-        (send snip set-max-height height)))))
+;; for displaying a single gist in the list view
+(define gist%
+ (class group-box-panel%
+   (init parent)
+   (init-field gist-json)
+   (super-new [label (dict-ref gist-json 'id)]
+              [parent parent])
+
+   (define gist-text (new text:basic% [auto-wrap #t]))
+   (define canvas (new editor-canvas%
+                       [parent this]
+                       [style '(no-hscroll no-vscroll)]
+                       [editor gist-text]
+                       [min-height 100]))
+   (define description
+     (let ([elem (dict-ref gist-json 'description)])
+       (if (or (eq? 'null elem) (string=? "" elem))
+           "No description provided"
+           elem)))
+   (send gist-text insert description)
+   (send gist-text lock #t)))
 
 ;; Tool setup
 (define (phase1) (void))
