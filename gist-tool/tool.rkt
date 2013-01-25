@@ -30,10 +30,14 @@
 
     (super-new)))
 
-(define (do-gist frame)
-  (define gist-spec (get-text-from-user "Enter gist id" "Enter gist id:"))
-  (when gist-spec
-    (define gist (get-gist-object (gist-spec->id gist-spec)))
+(define (do-gist frame [gist-object #f])
+  (define gist-spec
+    (and (not gist-object)
+         (get-text-from-user "Enter gist id" "Enter gist id:")))
+  (when (or gist-object gist-spec)
+    (define gist
+      (or gist-object
+          (get-gist-object (gist-spec->id gist-spec))))
     (define files (get-gist-files/dict gist))
     (define file-names (dict-keys files))
     (for ([name file-names])
@@ -45,13 +49,14 @@
 
 (define (show-gists frame)
   (define gists (get-public-gists))
-  (define dialog (new gist-dialog%))
+  (define dialog (new gist-dialog% [frame frame]))
   (send dialog add-gists gists)
   (send dialog show #t))
 
 ;; dialog% for displaying gists
 (define gist-dialog%
   (class dialog%
+    (init-field frame)
     (super-new [label "Public gists"])
 
     ;; to contain the editors for each gist
@@ -68,6 +73,7 @@
     (define (add-gist gist-json)
       (new gist%
            [gist-json gist-json]
+           [frame frame]
            [parent panel]))))
 
 ;; for displaying a single gist in the list view
@@ -75,10 +81,11 @@
 (define gist%
  (class group-box-panel%
    (init parent)
-   (init-field gist-json)
+   (init-field gist-json frame)
    (super-new [label (string-append "gist id: "
                                     (dict-ref gist-json 'id))]
-              [parent parent])
+              [parent parent]
+              [alignment '(left center)])
 
    (define gist-text (new text:hide-caret/selection%
                           [auto-wrap #t]))
@@ -87,6 +94,12 @@
                        [style '(no-border no-hscroll
                                 no-vscroll transparent)]
                        [editor gist-text]))
+
+   (define download-button
+     (new button%
+          [label "Open in DrRacket"]
+          [parent this]
+          [callback (λ (b e) (do-gist frame gist-json))]))
 
    (define description
      (let ([elem (dict-ref gist-json 'description)])
