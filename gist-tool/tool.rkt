@@ -54,7 +54,9 @@
     (super-new [label "Public gists"])
 
     ;; to contain the editors for each gist
-    (define panel (new vertical-panel% [parent this]))
+    (define panel (new vertical-panel%
+                       [parent this]
+                       [style '(vscroll)]))
 
     ;; display a list of gists
     (define/public (add-gists lst-of-gists)
@@ -68,26 +70,35 @@
            [parent panel]))))
 
 ;; for displaying a single gist in the list view
+;; Note: only displays correctly in 5.3.2.2 and up
 (define gist%
  (class group-box-panel%
    (init parent)
    (init-field gist-json)
-   (super-new [label (dict-ref gist-json 'id)]
+   (super-new [label (string-append "gist id: "
+                                    (dict-ref gist-json 'id))]
               [parent parent])
 
-   (define gist-text (new text:basic% [auto-wrap #t]))
+   (define gist-text (new text:hide-caret/selection%
+                          [auto-wrap #t]))
    (define canvas (new editor-canvas%
                        [parent this]
-                       [style '(no-hscroll no-vscroll)]
-                       [editor gist-text]
-                       [min-height 100]))
+                       [style '(no-border no-hscroll
+                                no-vscroll transparent)]
+                       [editor gist-text]))
    (define description
      (let ([elem (dict-ref gist-json 'description)])
        (if (or (eq? 'null elem) (string=? "" elem))
            "No description provided"
            elem)))
    (send gist-text insert description)
-   (send gist-text lock #t)))
+   (send gist-text hide-caret #t)
+   (send gist-text lock #t)
+
+   ;; make sure canvas is as large as needed for text
+   (define line-padding 2)
+   (send canvas set-line-count
+         (+ line-padding (send gist-text last-line)))))
 
 ;; Tool setup
 (define (phase1) (void))
