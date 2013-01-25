@@ -34,6 +34,7 @@
       (send frame create-new-tab)
       (define tabs (send frame get-tabs))
       (define new-text (send (last tabs) get-defs))
+      (send new-text erase)
       (send new-text insert (dict-ref files name)))))
 
 (define (phase1) (void))
